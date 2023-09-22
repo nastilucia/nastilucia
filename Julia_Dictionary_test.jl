@@ -65,20 +65,38 @@ function variables_index(sol)
 end
 
 function variables_index(sys, sol)
-    nsp = ModelingToolkit.namespace_variables(sys)
+    nsp_v = ModelingToolkit.namespace_variables(sys)
     dictionaryVariablesIndex = Dict{Any,Any}()
     dictionaryIndexVariables = Dict{Any,Any}()
-    count = 0
-    for i in nsp
-        count = count +1
-        dictionaryVariablesIndex[i]=count
-        dictionaryIndexVariables[count]=i
-        println(dictionaryVariablesIndex[i], "  ", sol[i][1])
-        println("   ")
-        println(i, "  ", sol[i][1])
-        println("   ")
-        println(dictionaryIndexVariables[count], "  ", sol[i][1])
+    index = 0
+    for i in nsp_v
+        index = index +1
+        dictionaryVariablesIndex[i]=index
+        dictionaryIndexVariables[index]=i
+        #println("riga 1 : ", dictionaryVariablesIndex[i], "  ", sol[i][1])
+        #println("   ")
+        #println("riga 2 : ", i, "  ", sol[i][1])
+        #println("   ")
+        #println("riga 3 : ", dictionaryIndexVariables[index], "  ", sol[dictionaryIndexVariables[index]][1])
     end
-    
-    return dictionaryVariablesIndex, dictionaryIndexVariables 
+    return [dictionaryVariablesIndex, dictionaryIndexVariables]
+end
+
+function return_initial_condition_by_index(sol, dict, index)
+    dictionaryIndexVariables = dict[2]
+    return sol[dictionaryIndexVariables[index]][1]
+end
+
+function return_initial_condition_by_name(sol, arg)
+    initial_condition_variable = sol[arg][1]
+    return  initial_condition_variable 
+end
+
+function dict_name_and_initial_conditions(sol, sys)
+    nsp_v = ModelingToolkit.namespace_variables(sys)
+    dictionaryNameInitialCondition = Dict{Any,Any}()
+    for i in nsp_v
+        dictionaryNameInitialCondition[i] = sol[i][1]
+    end
+    return dictionaryNameInitialCondition
 end
