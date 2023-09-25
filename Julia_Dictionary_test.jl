@@ -5,6 +5,7 @@ using GlobalSensitivity, Statistics, OrdinaryDiffEq, QuasiMonteCarlo, Plots
 using Interpolations
 using DifferentialEquations
 using ModelingToolkit
+using OrdinaryDiffEq
 
 using Distributions, Random
 @variables t
@@ -99,4 +100,50 @@ function dict_name_and_initial_conditions(sol, sys)
         dictionaryNameInitialCondition[i] = sol[i][1]
     end
     return dictionaryNameInitialCondition
+end
+
+function parameters_index_namespace(sys)
+    nsp_p = ModelingToolkit.namespace_parameters(sys)
+    dictionaryParametersIndex = Dict{Any,Any}()
+    dictionaryIndexParameters = Dict{Any,Any}()
+    index = 0
+    for i in nsp_p
+        index = index +1
+        dictionaryParametersIndex[i]=index
+        dictionaryIndexParameters[index]=i
+    end
+    return [dictionaryParametersIndex, dictionaryIndexParameters]
+end
+
+
+function params_index_name_value(_params)
+    
+    dictionaryParametersIndex = Dict{Any,Any}()
+    dictionaryIndexParameters = Dict{Any,Any}()
+    dictionaryIndexValue = Dict{Any,Any}()
+    index = 0
+    for (k,v) in _params
+        index = index +1
+        dictionaryParametersIndex[k]=index
+        dictionaryIndexParameters[index]=k
+        dictionaryIndexValue[index] = v
+    end
+    return [dictionaryParametersIndex, dictionaryIndexParameters, dictionaryIndexValue]
+end 
+    
+
+function convert_equations_variables(sys, dict_var)
+    equations = ModelingToolkit.get_eqs(sys)
+    f =""
+    for e in equations
+       print(e)
+    end
+
+    return f
+end
+
+function convesion_function(sys)
+   for i in sys
+    println(i)
+   end
 end
