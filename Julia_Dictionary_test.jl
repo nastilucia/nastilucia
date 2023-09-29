@@ -11,7 +11,8 @@ using Distributions, Random
 @variables t
 D = Differential(t)
 
-
+global text = "add_equation!(eqs, var1 ~ var2 * par1 * par2 * par3)
+add_equation!(eqs, var2 ~ var1 + par1)"
 
 y = (0.0, 10.0)
 
@@ -41,9 +42,10 @@ function system_perturbed(; name, v = _variables, p =_params)
     @variables X2(t) 
     eqs = []
 
-    add_equation!(eqs, D(var1) ~ -X2 * par1*par2*par3)
-    add_equation!(eqs, D(var2) ~ 1+X2 * par1*par2*par3)
-    add_equation!(eqs, X2 ~ WorldDynamics.interpolate(t, y, xranges) )
+    #add_equation!(eqs, D(var1) ~ -X2 * par1*par2*par3)
+    #add_equation!(eqs, D(var2) ~ 1+X2 * par1*par2*par3)
+    add_equation!(eqs, var1 ~ var2 * par1 * par2 * par3)
+    #add_equation!(eqs, X2 ~ WorldDynamics.interpolate(t, y, xranges) )
     return ODESystem(eqs; name=name)
 end
 
@@ -65,7 +67,7 @@ function variables_index(sol)
     return sol[1]
 end
 
-function variables_index(sys, sol)
+function variables_index(sys)
     nsp_v = ModelingToolkit.namespace_variables(sys)
     dictionaryVariablesIndex = Dict{Any,Any}()
     dictionaryIndexVariables = Dict{Any,Any}()
@@ -102,6 +104,21 @@ function dict_name_and_initial_conditions(sol, sys)
     return dictionaryNameInitialCondition
 end
 
+function variable_index_name_value(_variables)
+    
+    dictionaryVariablesIndex = Dict{Any,Any}()
+    dictionaryIndexVariables = Dict{Any,Any}()
+    dictionaryIndexValue = Dict{Any,Any}()
+    index = 0
+    for (k,v) in _variables
+        index = index +1
+        dictionaryVariablesIndex[k]=index
+        dictionaryIndexVariables[index]=k
+        dictionaryIndexValue[index] = v
+    end
+    return [dictionaryVariablesIndex, dictionaryIndexVariables, dictionaryIndexValue]
+end 
+
 function parameters_index_namespace(sys)
     nsp_p = ModelingToolkit.namespace_parameters(sys)
     dictionaryParametersIndex = Dict{Any,Any}()
@@ -130,7 +147,9 @@ function params_index_name_value(_params)
     end
     return [dictionaryParametersIndex, dictionaryIndexParameters, dictionaryIndexValue]
 end 
-    
+   
+
+
 
 function convert_equations_variables(sys, dict_var)
     equations = ModelingToolkit.get_eqs(sys)
@@ -146,4 +165,92 @@ function convesion_function(sys)
    for i in sys
     println(i)
    end
+end
+
+
+#Functions to translate the equations 
+
+
+function add_return_variable()
+    #e = "add_equation!(eqs, GSGDP ~ GS / NI)"
+    e = split(text, "\n" )
+    variable_equation = []
+    all_components = []
+    
+    for i in e
+        
+        e_split = split.(i, " ~ " )
+        e_all_components = split.(e_split[2], " ")
+        
+        #println("all component", e_all_components)
+        push!(all_components, e_all_components)
+        e_s_s= split(e_split[1], ", ")
+
+        push!(variable_equation, e_s_s[2])
+    #print(variabile_equation)
+    end
+    return [variable_equation, all_components]
+end
+
+
+function from_add_create_initial_du_array()
+    array_iv= add_return_variable()[1] #split the text of equations
+    variable_index = variable_index_name_value(_variables)[1] #returns the index of the variable
+    println(variable_index)
+    
+    du = []
+    for i in array_iv
+        for k in keys(variable_index)
+            if i==string(k)
+                
+                insert!(du, variable_index[k], variable_index[k])
+            end
+        end
+    end 
+    return du
+    
+end
+
+function from_add_create_equation()
+    du = from_add_create_initial_du_array()
+    array_eq= add_return_variable()[2] #split the text of equations
+    variable_index = variable_index_name_value(_variables)[1] #returns the index of the variable
+    #println(variable_index)
+    
+    for single_element in array_eq
+        #println("Single eq", single_element)
+        
+        index = findfirst(==(single_element), array_eq)
+        println(index)
+        for e in single_element
+            e = strip(e, [')'])
+            c = translate(e)
+            println("Element equation: ", c)
+            
+        end
+    end
+end
+
+
+
+function translate(e)
+    u = []
+    p = []
+    variable_index = variable_index_name_value(_variables)[1]
+    parameter_index = params_index_name_value(_params)[1]
+    for (kv,vv) in variable_index
+        for (kp, vp) in parameter_index
+            
+            
+            if e == string(kv) 
+                insert!(u,variable_index[kv],variable_index[kv] )
+               
+            end
+
+            if e == string(kp)
+                insert!(p, parameter_index[kp], parameter_index[kp])
+            end
+        end
+    end
+    return [u,p]
 end
