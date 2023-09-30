@@ -12,7 +12,8 @@ using Distributions, Random
 D = Differential(t)
 
 global text = "add_equation!(eqs, var1 ~ var2 * par1 * par2 * par3)
-add_equation!(eqs, var2 ~ var1 + par1)"
+add_equation!(eqs, var2 ~ var1 + par1)
+add_equation!(eqs, D(var1) ~ par2 * var2)"
 
 y = (0.0, 10.0)
 
@@ -109,11 +110,12 @@ function variable_index_name_value(_variables)
     dictionaryVariablesIndex = Dict{Any,Any}()
     dictionaryIndexVariables = Dict{Any,Any}()
     dictionaryIndexValue = Dict{Any,Any}()
+    
     index = 0
     for (k,v) in _variables
         index = index +1
-        dictionaryVariablesIndex[k]=index
-        dictionaryIndexVariables[index]=k
+        dictionaryVariablesIndex[string(k)]=index
+        dictionaryIndexVariables[index]=string(k)
         dictionaryIndexValue[index] = v
     end
     return [dictionaryVariablesIndex, dictionaryIndexVariables, dictionaryIndexValue]
@@ -141,116 +143,129 @@ function params_index_name_value(_params)
     index = 0
     for (k,v) in _params
         index = index +1
-        dictionaryParametersIndex[k]=index
-        dictionaryIndexParameters[index]=k
+        dictionaryParametersIndex[string(k)]=index
+        dictionaryIndexParameters[index]=string(k)
         dictionaryIndexValue[index] = v
     end
     return [dictionaryParametersIndex, dictionaryIndexParameters, dictionaryIndexValue]
 end 
-   
 
-
-
-function convert_equations_variables(sys, dict_var)
-    equations = ModelingToolkit.get_eqs(sys)
-    f =""
-    for e in equations
-       print(e)
-    end
-
-    return f
-end
-
-function convesion_function(sys)
-   for i in sys
-    println(i)
-   end
-end
-
-
-#Functions to translate the equations 
-
-
-function add_return_variable()
+function split_equation()
     #e = "add_equation!(eqs, GSGDP ~ GS / NI)"
     e = split(text, "\n" )
-    variable_equation = []
+   
     all_components = []
+    chunk_array = []
     
     for i in e
+        #e_split = split.(i, "eqs, " )
+        e_split= getindex.(split.(i, "eqs, "), 2)
+        e_split = chop(e_split, tail =1)
         
-        e_split = split.(i, " ~ " )
-        e_all_components = split.(e_split[2], " ")
         
-        #println("all component", e_all_components)
-        push!(all_components, e_all_components)
-        e_s_s= split(e_split[1], ", ")
-
-        push!(variable_equation, e_s_s[2])
-    #print(variabile_equation)
+        push!(all_components, e_split)
     end
-    return [variable_equation, all_components]
-end
-
-
-function from_add_create_initial_du_array()
-    array_iv= add_return_variable()[1] #split the text of equations
-    variable_index = variable_index_name_value(_variables)[1] #returns the index of the variable
-    println(variable_index)
     
-    du = []
-    for i in array_iv
-        for k in keys(variable_index)
-            if i==string(k)
+    for e_split in all_components
+        println(e_split[1])
+        if (string(e_split[1]) == "D" && string(e_split[2]) == "(" )
                 
-                insert!(du, variable_index[k], variable_index[k])
-            end
-        end
-    end 
-    return du
-    
-end
-
-function from_add_create_equation()
-    du = from_add_create_initial_du_array()
-    array_eq= add_return_variable()[2] #split the text of equations
-    variable_index = variable_index_name_value(_variables)[1] #returns the index of the variable
-    #println(variable_index)
-    
-    for single_element in array_eq
-        #println("Single eq", single_element)
-        
-        index = findfirst(==(single_element), array_eq)
-        println(index)
-        for e in single_element
-            e = strip(e, [')'])
-            c = translate(e)
-            println("Element equation: ", c)
+            println("Go to write differential equations")
+            write_differential_eq(e_split, chunk_array)
             
         end
+        if  (string(e_split[1]) != "D" && string(e_split[2]) != "(" )
+            println("Go to another method")
+            write_not_differential_eq(e_split, chunk_array)
+
+        end
+        
+        
     end
+    
+    return [all_components, chunk_array]
 end
 
-
-
-function translate(e)
-    u = []
-    p = []
+function write_not_differential_eq(e_split, chunk_array)
     variable_index = variable_index_name_value(_variables)[1]
     parameter_index = params_index_name_value(_params)[1]
-    for (kv,vv) in variable_index
-        for (kp, vp) in parameter_index
-            
-            
-            if e == string(kv) 
-                insert!(u,variable_index[kv],variable_index[kv] )
-               
-            end
+    
+    chunk = split.(e_split, " ")
+    new_chunk = ""
 
-            if e == string(kp)
-                insert!(p, parameter_index[kp], parameter_index[kp])
+    for i in chunk   
+        if (length(i) >=2)
+            if (i in (keys(variable_index)))
+                new_chunk = new_chunk * "u["*string(variable_index[i])*"]"
+                println("New chunk variable ", new_chunk)
+            end
+            if  (i in (keys(parameter_index)))
+                new_chunk = new_chunk * "p["*string(parameter_index[i])*"]"
+                println("New chunk parameter ", new_chunk)
+            end
+        elseif (length(i) == 1)
+            if (i == "~")
+                new_chunk = new_chunk*" = "
+                println("New chunk math", new_chunk)
+            else
+                new_chunk = new_chunk * " " * string(i)* " "
             end
         end
+    
     end
-    return [u,p]
+    push!(chunk_array, new_chunk)
 end
+
+
+
+function write_differential_eq(e_split, chunk_array)
+    variable_index = variable_index_name_value(_variables)[1]
+    parameter_index = params_index_name_value(_params)[1]
+    
+    chunk = split.(e_split, " ")
+    new_chunk = ""
+
+    for i in chunk   
+        
+        println("i: ", i)
+       
+
+        if (length(i) >=2 )
+            
+            if (string(i[1])== "D" && string(i[2]) == "(")
+                println(" I qui : ", i )
+                i_n = chop(i, head=2, tail =1)
+                println("variable_name ", i_n)
+               
+                new_chunk = new_chunk * "du["*string(variable_index[i_n])*"]"
+                println("New chunk variable ", new_chunk)
+            end
+        
+            if (i in (keys(variable_index)))
+                new_chunk = new_chunk * "u["*string(variable_index[i])*"]"
+                println("New chunk variable ", new_chunk)
+            end
+            if  (i in (keys(parameter_index)))
+                new_chunk = new_chunk * "p["*string(parameter_index[i])*"]"
+                println("New chunk parameter ", new_chunk)
+            end
+
+        
+        elseif (length(i) == 1)
+            if (i == "~")
+                
+                new_chunk = new_chunk*" = "
+                println("New chunk math", new_chunk)
+
+            else
+                new_chunk = new_chunk * " " * string(i)* " "
+        
+            end
+        end 
+    
+    end
+    push!(chunk_array, new_chunk)
+    return chunk_array
+end
+
+
