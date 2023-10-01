@@ -12,7 +12,7 @@ using Distributions, Random
 D = Differential(t)
 
 global text = "add_equation!(eqs, var1 ~ var2 * par1 * par2 * par3)
-add_equation!(eqs, var2 ~ var1 + par1)
+smooth_equation!(eqs, var2, var1, par1)
 add_equation!(eqs, D(var1) ~ par2 * var2)"
 
 y = (0.0, 10.0)
@@ -150,13 +150,36 @@ function params_index_name_value(_params)
     return [dictionaryParametersIndex, dictionaryIndexParameters, dictionaryIndexValue]
 end 
 
-function split_equation()
+function equation_one_by_one()
+    equations = split(text, "\n" )
+    chunk_array = []
+
+    for e in equations
+        println(e)
+        if (string(e[1]) == "a")
+            println("Add equation")
+            add_split_equation(e, chunk_array)
+            println(chunk_array)
+        end
+        if (string(e[1]) == "s")
+            println("Smooth equation")
+            smooth_translate_diff_eq(e, chunk_array)
+        end
+    end
+
+end
+
+
+#add_equation
+
+function add_split_equation(e, chunk_array)
+    
     #e = "add_equation!(eqs, GSGDP ~ GS / NI)"
-    e = split(text, "\n" )
+    #e = split(text, "\n" )
    
     all_components = []
-    chunk_array = []
-    
+    #chunk_array = []
+    """
     for i in e
         #e_split = split.(i, "eqs, " )
         e_split= getindex.(split.(i, "eqs, "), 2)
@@ -165,17 +188,21 @@ function split_equation()
         
         push!(all_components, e_split)
     end
+    """
+    e_split= getindex.(split.(e, "eqs, "), 2)
+    e_split = chop(e_split, tail =1)
+    push!(all_components, e_split)
     
     for e_split in all_components
         println(e_split[1])
         if (string(e_split[1]) == "D" && string(e_split[2]) == "(" )
                 
-            println("Go to write differential equations")
+            #println("Go to write differential equations")
             write_differential_eq(e_split, chunk_array)
             
         end
         if  (string(e_split[1]) != "D" && string(e_split[2]) != "(" )
-            println("Go to another method")
+            #println("Go to another method")
             write_not_differential_eq(e_split, chunk_array)
 
         end
@@ -197,16 +224,13 @@ function write_not_differential_eq(e_split, chunk_array)
         if (length(i) >=2)
             if (i in (keys(variable_index)))
                 new_chunk = new_chunk * "u["*string(variable_index[i])*"]"
-                println("New chunk variable ", new_chunk)
             end
             if  (i in (keys(parameter_index)))
                 new_chunk = new_chunk * "p["*string(parameter_index[i])*"]"
-                println("New chunk parameter ", new_chunk)
             end
         elseif (length(i) == 1)
             if (i == "~")
                 new_chunk = new_chunk*" = "
-                println("New chunk math", new_chunk)
             else
                 new_chunk = new_chunk * " " * string(i)* " "
             end
@@ -217,7 +241,7 @@ function write_not_differential_eq(e_split, chunk_array)
 end
 
 
-
+#add_equation
 function write_differential_eq(e_split, chunk_array)
     variable_index = variable_index_name_value(_variables)[1]
     parameter_index = params_index_name_value(_params)[1]
@@ -226,40 +250,26 @@ function write_differential_eq(e_split, chunk_array)
     new_chunk = ""
 
     for i in chunk   
-        
-        println("i: ", i)
-       
-
         if (length(i) >=2 )
             
             if (string(i[1])== "D" && string(i[2]) == "(")
-                println(" I qui : ", i )
                 i_n = chop(i, head=2, tail =1)
-                println("variable_name ", i_n)
-               
                 new_chunk = new_chunk * "du["*string(variable_index[i_n])*"]"
-                println("New chunk variable ", new_chunk)
             end
         
             if (i in (keys(variable_index)))
                 new_chunk = new_chunk * "u["*string(variable_index[i])*"]"
-                println("New chunk variable ", new_chunk)
             end
             if  (i in (keys(parameter_index)))
                 new_chunk = new_chunk * "p["*string(parameter_index[i])*"]"
-                println("New chunk parameter ", new_chunk)
             end
 
         
         elseif (length(i) == 1)
             if (i == "~")
-                
                 new_chunk = new_chunk*" = "
-                println("New chunk math", new_chunk)
-
             else
-                new_chunk = new_chunk * " " * string(i)* " "
-        
+                new_chunk = new_chunk * " " * string(i)* " "     
             end
         end 
     
@@ -269,3 +279,95 @@ function write_differential_eq(e_split, chunk_array)
 end
 
 
+
+#global e1 ="smooth!(eqs, var1, var1 * (var1 + var1 + var2) / 3, par3)"
+#global e1 = "smooth!(eqs, var1, var2, par1)"
+function smooth_translate_diff_eq(e, chunk_array)
+    
+    variable_index = variable_index_name_value(_variables)[1]
+    parameter_index = params_index_name_value(_params)[1]
+    new_chunk1 = ""
+    new_chunk2 = ""
+    new_chunk3 = ""
+    chunk_n = split.(e, "eqs, ")
+    println("chunk_n     ", chunk_n)
+    println("chunk_n 2    ", chunk_n[2])
+    chunk = chop(chunk_n[2], tail =1)
+    chunk = split.(chunk, ", ")
+    
+    #Define e translate du[variable]
+    if (string(chunk[1]) in (keys(variable_index)))
+        new_chunk1 = new_chunk1 * "du["*string(variable_index[string(chunk[1])])*"]" * " = "
+    end
+
+    #define and translate chunk 2 
+
+    s2 = chunk[2]
+    s2 = split.(s2, " ")
+    length_s2 = length(s2)
+
+    if (length_s2 == 1)
+        if (string(chunk[2]) in (keys(variable_index)))
+            new_chunk2 = new_chunk2 * "u["*string(variable_index[string(chunk[2])])*"]" 
+        end
+    end
+
+    if (length_s2 > 1)
+        for i in s2
+            println("i", i)
+            if (length(i) > 1)
+                if (string(first(i)) == "(")
+                    i_n= replace(i, "("=>"")
+                    if (i_n in (keys(variable_index)))
+                        new_chunk2 = new_chunk2 * "(" * "u["*string(variable_index[i_n])*"]"
+                    end
+                    if  (i_n in (keys(parameter_index)))
+                        new_chunk2 = new_chunk2 *  "(" * "p["*string(parameter_index[i_n])*"]"
+                    end
+                end 
+                  
+                if (string(last(i)) ==")")
+                    i_n= chop(i, tail=1)
+                    if (i_n in (keys(variable_index)))
+                        new_chunk2 = new_chunk2 * "u["*string(variable_index[string(i_n)])*"])"
+                    end
+                    if  (string(i_n) in (keys(parameter_index)))
+                        new_chunk2 = new_chunk2 * "p["*string(parameter_index[string(i_n)])*"])"
+                    end 
+                end
+                if (string(last(i)) != ")" && string(first(i)) != "(")
+                    if (i in (keys(variable_index)))
+                        new_chunk2 = new_chunk2 * "u["*string(variable_index[i])*"]"
+                    end
+                    if  (i in (keys(parameter_index)))
+                        new_chunk2 = new_chunk2 * "p["*string(parameter_index[i])*"]"
+                    end 
+                end
+            end
+            if (length(i) == 1)
+            if (i == "~")   
+                new_chunk2 = new_chunk2*" = "
+            else
+                new_chunk2 = new_chunk2 * " " * string(i)* " "
+            end
+            
+            end
+        end
+    end
+
+    
+    
+    #define and translate chunk 3
+    if (string(chunk[3]) in (keys(parameter_index)))
+        new_chunk3 = new_chunk3 * " / p["*string(parameter_index[string(chunk[3])])*"]"
+       
+    end
+    
+    
+new_chunk_final = new_chunk1 * "(" *new_chunk2 * ")" * new_chunk3    
+push!(chunk_array, new_chunk_final)
+    
+return chunk_array  
+    
+
+end
