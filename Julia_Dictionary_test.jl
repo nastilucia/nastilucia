@@ -150,6 +150,8 @@ function params_index_name_value(_params)
     return [dictionaryParametersIndex, dictionaryIndexParameters, dictionaryIndexValue]
 end 
 
+#split equations based on their characteristics 
+
 function equation_one_by_one()
     equations = split(text, "\n" )
     chunk_array = []
