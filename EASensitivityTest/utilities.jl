@@ -8,12 +8,12 @@ include("initialisations.jl")
 include("system.jl")
 _variables = getinitialisations()
 _params = getparameters()
-@named e4a = earth4all()
 
 
 
-global text= "add_equation!(eqs, D(CO2A) ~ CO2E - CO2AB + 2 * CO2FCH4)
-add_equation!(eqs, TRHGS ~ (TRSS1980 * ( (OW + 297) / 297) ) * (AL / AL1980) )
+
+global text = "add_equation!(eqs, TRHGS ~ (TRSS1980 * ( (OW + 297) / 297) ) * (AL / AL1980) )
+add_equation!(eqs, D(CO2A) ~ CO2E - CO2AB + 2 * CO2FCH4)
 add_equation!(eqs, KN2OEKF ~ KN2OKF1980 * exp(-RDN2OKF * (t - 1980)) * IfElse.ifelse(t > 2022, exp(-ERDN2OKF2022 * (t - 2022)), 1))
 add_equation!(eqs, MMN2OE ~ FEUS * KN2OEKF / 1000)
 add_equation!(eqs, NN2OE ~ withlookup(t, [(1980.0, 0.009), (2020.0, 0.009), (2099.27, 0.0)]))
@@ -233,7 +233,7 @@ add_equation!(eqs, TGIR ~ GBC + ELTI)
 add_equation!(eqs, TIR ~ CBSR + NBBM)
 add_equation!(eqs, WBC ~ CCSD)
 add_equation!(eqs, ACY ~ (DCYCA * (1 - FRA) * SQICA + CYRA * FRA) * CO2ELY * WELY)
-add_equation!(eqs, ALFL ~ 1 - exp(-FFLR / TFFLR))
+add_equation!(eqs, ALFL ~ 1 - exp(-FFLR / TFFLR) )
 add_equation!(eqs, AFSRA ~ 268 - SFU)
 add_equation!(eqs, D(BALA) ~ CRLO)
 add_equation!(eqs, BIUS ~ withlookup(t, [(1980.0, 0.0), (1990.0, 0.0), (2000.0, 0.0), (2020.0, 0.0), (2100.0, 0.0)]))
@@ -243,7 +243,7 @@ add_equation!(eqs, CO2AFL ~ FOLA * (CO2AFLH / 1000) * CO2ELY * WELY)
 add_equation!(eqs, CO2AFLH ~ 1.6 * FAM)
 add_equation!(eqs, CO2ELULUC ~ CO2RFC - CO2AFL - ECO2ARA)
 add_equation!(eqs, CO2ELY ~ IfElse.ifelse(t > 2022, 1 + CO2CEACY * (CO2CA / CO2C2022 - 1), 1))
-add_equation!(eqs, CO2RFC ~ ((OGRE + CREX) * CO2RHFC ) / 1000 )
+add_equation!(eqs, CO2RFC ~ ( (OGRE + CREX) * CO2RHFC) / 1000 )
 add_equation!(eqs, COFE ~ FEUS * CTF / 1000)
 add_equation!(eqs, COFO ~ AFGDP * GDP + CRA + COFE)
 add_equation!(eqs, CRA ~ (ECRA * RAA) / 1000)
@@ -275,7 +275,7 @@ add_equation!(eqs, FEER ~ 1 + FUELER * (FUCA / SFU - 1))
 add_equation!(eqs, FERM ~ RMF * KCKRM)
 add_equation!(eqs, FEUS ~ CRLA * (1 - FRA) * FUCA / 1000)
 add_equation!(eqs, FFI ~ FOFO / FF80)
-add_equation!(eqs, FFLR ~ max(0, FOLA / inits[:FOLA]))
+add_equation!(eqs, FFLR ~ max(0, FOLA / initFOLA) )
 add_equation!(eqs, FFLREOGRR ~ max(1, 1 + FFLREOGRRM * (FFLR - TFFLR)))
 add_equation!(eqs, FNRM ~ ramp(t, GFNRM / IPP, 2022, 2022 + IPP))
 add_equation!(eqs, FOFO ~ CRLA * FEUS)
@@ -341,7 +341,7 @@ add_equation!(eqs, SA ~ DEL * PPU)
 smooth!(eqs, SSWI, DSWI, TAS)
 add_equation!(eqs, AGIW ~ WARA * AHW)
 add_equation!(eqs, AHW ~ NHW / PFTJ)
-add_equation!(eqs, AHW1980 ~ inits[:NHW] / PFTJ80)
+add_equation!(eqs, AHW1980 ~ initNHW / PFTJ80)
 add_equation!(eqs, AVWO ~ WAP * LPR)
 add_equation!(eqs, CECLR ~ ROCECLR * ECLR)
 add_equation!(eqs, CHWO ~ (OPWO - WF) / HFD)
@@ -352,15 +352,15 @@ add_equation!(eqs, GDPPEROCCLR ~ max(0, 1 + GDPPEROCCLRM * (GDPP / GDPP1980 - 1)
 add_equation!(eqs, ENLPR2022 ~ ramp(t, GENLPR / IPP, 2022, 2022 + IPP))
 add_equation!(eqs, HFD ~ TYLD / 3)
 add_equation!(eqs, HWMGDPP ~ 1 + TENHW * (GDPP / GDPP1980 - 1))
-add_equation!(eqs, IWEOCLR ~ 1 + WSOECLR * (WSO / inits[:WSO] - 1))
+add_equation!(eqs, IWEOCLR ~ 1 + WSOECLR * (WSO / initWSO - 1))
 add_equation!(eqs, ILPR ~ NLPR - PSW)
 add_equation!(eqs, LAPR ~ (OUTP * PRUN) / LAUS)
 add_equation!(eqs, LAUS ~ WF * AHW)
-add_equation!(eqs, LAUS80 ~ inits[:WF] * AHW1980)
+add_equation!(eqs, LAUS80 ~ initWF * AHW1980)
 smooth!(eqs, LPR, ILPR, TELLM)
 add_equation!(eqs, LTEWSO ~ WSO * RWER)
-smooth!(eqs, NHW, inits[:NHW] * HWMGDPP, TAHW)
-add_equation!(eqs, NLPR ~ NLPR80 * (1 + WSOELPR * (WSO / inits[:WSO] - 1)) + ENLPR2022)
+smooth!(eqs, NHW, initNHW * HWMGDPP, TAHW)
+add_equation!(eqs, NLPR ~ NLPR80 * (1 + WSOELPR * (WSO / initWSO - 1)) + ENLPR2022)
 add_equation!(eqs, OCLR ~ ECLR * WEOCLR)
 add_equation!(eqs, OPWO ~ (CAP / OCLR) * PFTJ)
 add_equation!(eqs, PART ~ LPR * (1 - PURA))
@@ -427,7 +427,7 @@ smooth!(eqs, OLY, ORO, 1)
 add_equation!(eqs, OOV ~ ORO * PRUN)
 add_equation!(eqs, ORO ~ OO1980 * ( (CPIS + CPUS) / (CAPPIS1980 + CAPPUS1980) ) ** KAPPA * (LAUS / LAUS1980) ** LAMBDA * (ETFP))
 smooth!(eqs, PEDE, EDE, TOED)
-add_equation!(eqs, WSOEFCA ~ 1 + WSOEFRA * (WASH / inits[:WSO] - 1))
+add_equation!(eqs, WSOEFCA ~ 1 + WSOEFRA * (WASH / initWSO - 1))
 add_equation!(eqs, D(A0020) ~ BIRTHS - PASS20)
 add_equation!(eqs, D(A2040) ~ PASS20 - PASS40)
 add_equation!(eqs, A20PA ~ A2040 + A4060 + A60PL - OP)
@@ -439,19 +439,19 @@ add_equation!(eqs, CEFR ~ CMFR * EFR)
 add_equation!(eqs, DEATHR ~ DEATHS / POP)
 delay_n!(eqs, PASS60, RT_DEATHS, LV_DEATHS, LE60, ORDER)
 add_equation!(eqs, DEATHS ~ RT_DEATHS[ORDER])
-add_equation!(eqs, DNC ~ ( (DNCM + (DNC80 - DNCM) * exp(-DNCG * (EGDPP - inits[:EGDPP])) ) * (1 + DNCA * (EGDPP - inits[:EGDPP]))) * (1 - EFR) * FM)
+add_equation!(eqs, DNC ~ ( (DNCM + (DNC80 - DNCM) * exp(-DNCG * (EGDPP - initEGDPP) ) ) * (1 + DNCA * (EGDPP - initEGDPP))) * (1 - EFR) * FM)
 add_equation!(eqs, DR ~ (A0020 + A60PL) / (A2040 + A4060))
 add_equation!(eqs, EFR ~ ramp(t, GEFR / IPP, 2022, 2022 + IPP))
-add_equation!(eqs, EPA ~ ramp(t, (GEPA - inits[:EPA]) / IPP, 2022, 22022 + IPP))
+add_equation!(eqs, EPA ~ ramp(t, (GEPA - initEPA) / IPP, 2022, 22022 + IPP))
 add_equation!(eqs, D(EGDPP) ~ (GDPP - EGDPP) / TAHI)
 add_equation!(eqs, FM ~ IfElse.ifelse( SSP2FA2022F > 0, IfElse.ifelse(t > 2022, 1 + ramp(t, (MFM - 1) / 78, 2022, 2100), 1), 1))
 add_equation!(eqs, GDPP ~ GDP / POP)
-add_equation!(eqs, LE ~ ((LEMAX - (LEMAX - inits[:LE]) * exp(-LEG * (EGDPP - inits[:EGDPP]))) * (1 + LEA * (EGDPP - inits[:EGDPP]))) * WELE * LEM)
+add_equation!(eqs, LE ~ ((LEMAX - (LEMAX - initLE) * exp(-LEG * (EGDPP - initEGDPP) )) * (1 + LEA * (EGDPP - initEGDPP) )) * WELE * LEM)
 add_equation!(eqs, LE60 ~ LE - 60)
 add_equation!(eqs, LEM ~ IfElse.ifelse( SSP2FA2022F > 0, IfElse.ifelse(t > 2022, 1 + ramp(t, (MLEM - 1) / 78, 2022, 2100), 1), 1))
 add_equation!(eqs, OF ~ DNC * FADFS)
 add_equation!(eqs, OP ~ A60PL * (LE - PA) / (LE - 60))
-add_equation!(eqs, PA ~ IfElse.ifelse( LE < inits[:LE], inits[:PA], inits[:PA] + LEEPA * (LE + EPA - inits[:LE])))
+add_equation!(eqs, PA ~ IfElse.ifelse( LE < initLE, initPA, initPA + LEEPA * (LE + EPA - initLE) ))
 delay_n!(eqs, BIRTHS, RT_PASS20, LV_PASS20, 20, ORDER)
 add_equation!(eqs, PASS20 ~ RT_PASS20[ORDER])
 delay_n!(eqs, PASS20, RT_PASS40, LV_PASS40, 20, ORDER)
@@ -499,8 +499,8 @@ add_equation!(eqs, PSSGDP ~ PSP / GDPP)
 add_equation!(eqs, PSESTR ~ WorldDynamics.interpolate( PSSGDP / SPS, tables[:PSESTR], ranges[:PSESTR]))
 smooth!(eqs, RD, IRD, TCRD)
 add_equation!(eqs, STE ~ 1 + PESTF * (ORP - AP))
-add_equation!(eqs, STEERD ~ 1 + STEERDF * (STE / inits[:STE] - 1))
-add_equation!(eqs, STRERD ~ 1 + STRERDF * (SOTR / inits[:SOTR] - 1))
+add_equation!(eqs, STEERD ~ 1 + STEERDF * (STE / initSTE - 1))
+add_equation!(eqs, STRERD ~ 1 + STRERDF * (SOTR / initSOTR - 1))
 smooth!(eqs, SOTR, IST, TEST)
 add_equation!(eqs, WBEP ~ 1 + PAEAWBF * (LPR / THPA - 1))"
 
@@ -521,15 +521,10 @@ function variables_index(e4a)
         c_2 = c[2]
         c_2 = split(c_2, "(")
         variable = c_2[1]
-
         index = index +1
         dictionaryVariablesIndex[variable]=index
         dictionaryIndexVariables[index]=variable
-        #println("riga 1 : ", dictionaryVariablesIndex[i], "  ", sol[i][1])
-        #println("   ")
-        #println("riga 2 : ", i, "  ", sol[i][1])
-        #println("   ")
-        #println("riga 3 : ", dictionaryIndexVariables[index], "  ", sol[dictionaryIndexVariables[index]][1])
+        
     end
     return [dictionaryVariablesIndex, dictionaryIndexVariables]
 end
@@ -579,9 +574,6 @@ function parameters_index_namespace(e4a)
         c = split(c, "₊")
         c_2 = c[2]
         
-        
-        
-
         index = index +1
         dictionaryParametersIndex[c_2]=index
         dictionaryIndexParameters[index]=c_2
@@ -627,7 +619,7 @@ end
 function write_txt()
     translated_equations = equation_one_by_one()
     
-    open("equations.txt", "w") do io
+    open("all_equations.txt", "w") do io
         for line in  translated_equations
             println(io, line)
         end
@@ -688,10 +680,12 @@ function write_not_differential_eq(e_split, chunk_array)
         
         
         if (length(i) >=2)
+            
             if (i in (keys(variable_index)))
                 new_chunk = new_chunk * "u["*string(variable_index[i])*"]"
             end
             if  (i in (keys(parameter_index)))
+                
                 new_chunk = new_chunk * "p["*string(parameter_index[i])*"]"
             end
             if  ( !(i in (keys(parameter_index))) && !(i in (keys(variable_index))) )
@@ -709,14 +703,14 @@ function write_not_differential_eq(e_split, chunk_array)
                     if (string(first(i_d[2])) == "-" )
                         c = i_d[2]
                         c = replace(c, "-"=>"") 
+                        
                         if (c  in (keys(variable_index)))
                             new_chunk = new_chunk * "exp(-u["*string(variable_index[c])*"] "
-                        end
-                        if  (c  in (keys(parameter_index)))
+                        
+                        elseif  (c  in (keys(parameter_index)))
                             new_chunk = new_chunk * "exp(-p["*string(parameter_index[c])*"] "
-                        end
-
-                        if  ( ! (c in (keys(parameter_index))) && !(c in (keys(parameter_index)))) 
+                        
+                        else  ( ! (c in (keys(parameter_index))) && !(c in (keys(parameter_index)))) 
                         
                             new_chunk = new_chunk * string(i) 
                         end
@@ -807,12 +801,12 @@ function write_differential_eq(e_split, chunk_array)
     chunk = split.(e_split, " ")
     new_chunk = ""
 
-    for i in chunk   
+    for i in chunk  
+        
         if (length(i) >=2 )
             
             if (string(i[1])== "D" && string(i[2]) == "(")
                 i_n = chop(i, head=2, tail =1)
-                
                 new_chunk = new_chunk * "du["*string(variable_index[i_n])*"]"
             end
         
@@ -822,7 +816,31 @@ function write_differential_eq(e_split, chunk_array)
             if  (i in (keys(parameter_index)))
                 new_chunk = new_chunk * "p["*string(parameter_index[i])*"]"
             end
+            if (string(i[1]) == "(" && string(last(i)) != ")" && string(i[1])!= "D")
+                i_n= replace(i, "("=>"")
+                if (i_n in (keys(variable_index)))
+                    new_chunk = new_chunk  * "(u["*string(variable_index[i_n])*"]"
+                
+                elseif  (i_n in (keys(parameter_index)))
+                    new_chunk = new_chunk *  "(p["*string(parameter_index[i_n])*"]"
+                else
+                    new_chunk = new_chunk * " " * string(i)* " "
+                end
+            end
 
+            if (string(last(i)) == ")" && string(i[1]) != "(" && string(i[1])!= "D")
+                c = string(last(i))
+                i_c = string(chop(i, tail = 1))
+                
+                if (string(i_c) in (keys(variable_index)))
+                    new_chunk = new_chunk * "u["*string(variable_index[i_c])*"]" * c * " "
+                elseif  (i_c in (keys(parameter_index)))
+                    new_chunk = new_chunk * "p["*string(parameter_index[i_c])*"]" * c * " "
+                else
+                    new_chunk = new_chunk * " " * string(i)* " " 
+                end
+            end
+                
         
         elseif (length(i) == 1)
             if (i == "~")
@@ -954,3 +972,4 @@ return chunk_array
     
 
 end
+

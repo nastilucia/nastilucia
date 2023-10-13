@@ -1,5 +1,15 @@
 _params = Dict{Symbol,Float64}(
     # climate
+    :initFOLA => 1100,
+    :initNHW => 2,
+    :initWSO =>0.5,
+    :initWF => 1530,
+    :initEGDPP => 6.4,
+    :initEPA => 0,
+    :initLE => 67,
+    :initPA => 62,
+    :initSTE => 1.3,
+    :initSOTR => 0.6, 
     :ERDN2OKF2022 => 0, # 0.01 in GL,
     :RDN2OKF => 0.01,
     :KN2OKF1980 => 0.11,
@@ -312,6 +322,7 @@ _params = Dict{Symbol,Float64}(
     :TPR => 0.02,
     :TPS => 3,
     :TW => 1,
+   
 )
 
 getparameters() = copy(_params)
