@@ -2,7 +2,7 @@
 using Interpolations
 using DifferentialEquations
 using ModelingToolkit
-
+using DelimitedFiles
 include("parameters.jl")
 include("initialisations.jl")
 include("system.jl")
@@ -10,9 +10,7 @@ _variables = getinitialisations()
 _params = getparameters()
 
 
-
-
-global text = "add_equation!(eqs, TRHGS ~ (TRSS1980 * ( (OW + 297) / 297) ) * (AL / AL1980) )
+global text =  "add_equation!(eqs, TRHGS ~ (TRSS1980 * ( (OW + 297) / 297) ) * (AL / AL1980) )
 add_equation!(eqs, D(CO2A) ~ CO2E - CO2AB + 2 * CO2FCH4)
 add_equation!(eqs, KN2OEKF ~ KN2OKF1980 * exp(-RDN2OKF * (t - 1980)) * IfElse.ifelse(t > 2022, exp(-ERDN2OKF2022 * (t - 2022)), 1))
 add_equation!(eqs, MMN2OE ~ FEUS * KN2OEKF / 1000)
@@ -171,7 +169,7 @@ add_equation!(eqs, DIREC ~ REC / LREC)
 add_equation!(eqs, ASWC ~ AREC)
 add_equation!(eqs, D(ACSWCF1980) ~ ASWC)
 add_equation!(eqs, NDSWC ~ log(2) + log( ACSWCF1980 / SWC1980))
-add_equation!(eqs, CISWC ~ (1 - CRDSWC) ** NDSWC)
+add_equation!(eqs, CISWC ~ (1 - CRDSWC) ^ NDSWC)
 add_equation!(eqs, CAPEXRED ~ CAPEXRE1980 * CISWC)
 add_equation!(eqs, CAPEXREG ~ CAPEXRED * AREC)
 add_equation!(eqs, OPEXREG ~ OPEXRED * REP)
@@ -238,7 +236,7 @@ add_equation!(eqs, AFSRA ~ 268 - SFU)
 add_equation!(eqs, D(BALA) ~ CRLO)
 add_equation!(eqs, BIUS ~ withlookup(t, [(1980.0, 0.0), (1990.0, 0.0), (2000.0, 0.0), (2020.0, 0.0), (2100.0, 0.0)]))
 add_equation!(eqs, CEM ~ IfElse.ifelse(t > 2022, 1 - SSP2LMA * ramp(t, (1 - 0) / 78, 2022, 2100), 1))
-add_equation!(eqs, CIRA ~ (1 - CRDRA) ** NDRA)
+add_equation!(eqs, CIRA ~ (1 - CRDRA) ^ NDRA)
 add_equation!(eqs, CO2AFL ~ FOLA * (CO2AFLH / 1000) * CO2ELY * WELY)
 add_equation!(eqs, CO2AFLH ~ 1.6 * FAM)
 add_equation!(eqs, CO2ELULUC ~ CO2RFC - CO2AFL - ECO2ARA)
@@ -262,7 +260,7 @@ add_equation!(eqs, CSRA ~ CYRA * CRLA * FRA)
 add_equation!(eqs, CWR ~ ramp(t, GCWR / IPP, 2022, 2022 + IPP))
 add_equation!(eqs, DCS ~ CRDE)
 add_equation!(eqs, DCSCA ~ DCS - CSRA)
-add_equation!(eqs, DCYCA ~ DCSCA / (CRLA * (1 - FRA)))
+add_equation!(eqs, DCYCA ~ DCSCA / (CRLA * (1 - FRA) ) )
 add_equation!(eqs, DRM ~ ((POP * DRMP) / 1000) * (1 - FNRM))
 add_equation!(eqs, DRMP ~ TURMP)
 add_equation!(eqs, ECFT ~ CRA - FCR)
@@ -276,7 +274,7 @@ add_equation!(eqs, FERM ~ RMF * KCKRM)
 add_equation!(eqs, FEUS ~ CRLA * (1 - FRA) * FUCA / 1000)
 add_equation!(eqs, FFI ~ FOFO / FF80)
 add_equation!(eqs, FFLR ~ max(0, FOLA / initFOLA) )
-add_equation!(eqs, FFLREOGRR ~ max(1, 1 + FFLREOGRRM * (FFLR - TFFLR)))
+add_equation!(eqs, FFLREOGRR ~ max(1, 1 + FFLREOGRRM * (FFLR - TFFLR) ) )
 add_equation!(eqs, FNRM ~ ramp(t, GFNRM / IPP, 2022, 2022 + IPP))
 add_equation!(eqs, FOFO ~ CRLA * FEUS)
 add_equation!(eqs, D(FOLA) ~ NFL - CREX)
@@ -296,7 +294,7 @@ add_equation!(eqs, LOCR ~ CRLO + UREX)
 add_equation!(eqs, NDRA ~ log( (RAA + EGB22) / EGB22) / 0.693)
 add_equation!(eqs, NFL ~ OGRE * (1 - FCG))
 add_equation!(eqs, NGL ~ OGRE * FCG)
-add_equation!(eqs, D(OGFA) ~ -NFL - NGL)
+add_equation!(eqs, D(OGFA) ~ - NFL - NGL)
 add_equation!(eqs, OGRE ~ OGFA * OGRR * OGRRM)
 add_equation!(eqs, OGRR ~ OGRR80 * FFLREOGRR)
 add_equation!(eqs, OGRRM ~ IfElse.ifelse(t > 2022, 1 - SSP2LMA * ramp(t, (1 - 0) / 78, 2022, 2100), 1))
@@ -321,7 +319,7 @@ add_equation!(eqs, D(URLA) ~ UREX)
 add_equation!(eqs, WELY ~ IfElse.ifelse(t > 2022, 1 + OWEACY * (OW / OW2022 - 1), 1))
 add_equation!(eqs, CDDI ~ ROCDDI * DELDI)
 add_equation!(eqs, CPI ~ PRIN * IR)
-add_equation!(eqs, DEL ~ ((EPP / PPU) / (DELDI / DDI1980)) * IfElse.ifelse(t > 1984, PNIS, 1))
+add_equation!(eqs, DEL ~ ((EPP / PPU) / (DELDI / DDI1980) ) * IfElse.ifelse(t > 1984, PNIS, 1))
 add_equation!(eqs, D(DELDI) ~ CDDI)
 add_equation!(eqs, DEPU ~ 0 + PH * pulse(t, 2020, 5))
 add_equation!(eqs, DSWI ~ 1 + INVEOSWI * (PRI / DRI - 1))
@@ -425,7 +423,7 @@ add_equation!(eqs, LCPIS ~ (LCPIS1980 * OWELC) / EDELC)
 smooth!(eqs, OGR, (ORO - OLY) / OLY, 1)
 smooth!(eqs, OLY, ORO, 1)
 add_equation!(eqs, OOV ~ ORO * PRUN)
-add_equation!(eqs, ORO ~ OO1980 * ( (CPIS + CPUS) / (CAPPIS1980 + CAPPUS1980) ) ** KAPPA * (LAUS / LAUS1980) ** LAMBDA * (ETFP))
+add_equation!(eqs, ORO ~ OO1980 * ( (CPIS + CPUS) / (CAPPIS1980 + CAPPUS1980) ) ^ KAPPA * (LAUS / LAUS1980) ^ LAMBDA * (ETFP))
 smooth!(eqs, PEDE, EDE, TOED)
 add_equation!(eqs, WSOEFCA ~ 1 + WSOEFRA * (WASH / initWSO - 1))
 add_equation!(eqs, D(A0020) ~ BIRTHS - PASS20)
@@ -438,8 +436,8 @@ add_equation!(eqs, BIRTHS ~ A2040 * FW * (OF / FP))
 add_equation!(eqs, CEFR ~ CMFR * EFR)
 add_equation!(eqs, DEATHR ~ DEATHS / POP)
 delay_n!(eqs, PASS60, RT_DEATHS, LV_DEATHS, LE60, ORDER)
-add_equation!(eqs, DEATHS ~ RT_DEATHS[ORDER])
-add_equation!(eqs, DNC ~ ( (DNCM + (DNC80 - DNCM) * exp(-DNCG * (EGDPP - initEGDPP) ) ) * (1 + DNCA * (EGDPP - initEGDPP))) * (1 - EFR) * FM)
+add_equation!(eqs, DEATHS ~ RT_DEATHS[10])
+add_equation!(eqs, DNC ~ ( (DNCM + (DNC80 - DNCM) * exp(-DNCG * (EGDPP - initEGDPP) ) ) * (1 + DNCA * (EGDPP - initEGDPP) ) ) * (1 - EFR) * FM)
 add_equation!(eqs, DR ~ (A0020 + A60PL) / (A2040 + A4060))
 add_equation!(eqs, EFR ~ ramp(t, GEFR / IPP, 2022, 2022 + IPP))
 add_equation!(eqs, EPA ~ ramp(t, (GEPA - initEPA) / IPP, 2022, 22022 + IPP))
@@ -453,11 +451,11 @@ add_equation!(eqs, OF ~ DNC * FADFS)
 add_equation!(eqs, OP ~ A60PL * (LE - PA) / (LE - 60))
 add_equation!(eqs, PA ~ IfElse.ifelse( LE < initLE, initPA, initPA + LEEPA * (LE + EPA - initLE) ))
 delay_n!(eqs, BIRTHS, RT_PASS20, LV_PASS20, 20, ORDER)
-add_equation!(eqs, PASS20 ~ RT_PASS20[ORDER])
+add_equation!(eqs, PASS20 ~ RT_PASS20[10])
 delay_n!(eqs, PASS20, RT_PASS40, LV_PASS40, 20, ORDER)
-add_equation!(eqs, PASS40 ~ RT_PASS40[ORDER])
+add_equation!(eqs, PASS40 ~ RT_PASS40[10])
 delay_n!(eqs, PASS40, RT_PASS60, LV_PASS60, 20, ORDER)
-add_equation!(eqs, PASS60 ~ RT_PASS60[ORDER])
+add_equation!(eqs, PASS60 ~ RT_PASS60[10])
 add_equation!(eqs, PGR ~ BIRTHR - DEATHR)
 add_equation!(eqs, POP ~ A0020 + A2040 + A4060 + A60PL)
 add_equation!(eqs, PW ~ OP / A20PA)
@@ -505,29 +503,75 @@ smooth!(eqs, SOTR, IST, TEST)
 add_equation!(eqs, WBEP ~ 1 + PAEAWBF * (LPR / THPA - 1))"
 
 function variables_index_init_con(sol)
-    #A = Array(sol)
-    #return [ x[1] for x in sol ]
     return sol[1]
 end
 
 function variables_index(e4a)
     nsp_v = ModelingToolkit.namespace_variables(e4a)
-    dictionaryVariablesIndex = Dict{Any,Any}()
-    dictionaryIndexVariables = Dict{Any,Any}()
+    dictionaryVariablesIndex = Dict{String,Int64}()
+    dictionaryIndexVariables = Dict{Int64, String}()
     index = 0
     for i in nsp_v
         c = string(i)
         c = split(c, "₊")
         c_2 = c[2]
-        c_2 = split(c_2, "(")
+        c_2 = split(c_2, "(t)")
         variable = c_2[1]
+        if (c_2[2] != "")
+            order = replace(c_2[2], ")" => "")
+            variable = variable * order
+        end
         index = index +1
         dictionaryVariablesIndex[variable]=index
         dictionaryIndexVariables[index]=variable
-        
     end
     return [dictionaryVariablesIndex, dictionaryIndexVariables]
 end
+
+"This function returns a file text with the dictionary with variables name as keys and values as index"
+function write_dict_variables_index()
+    variables_dictionary = variables_index(e4a)[1]
+    
+    open("dict_k_variables_v_index.txt", "w") do io
+        for line in  variables_dictionary
+            println(io, line)
+        end
+    end
+end
+
+"This function returns a file text with the dictionary  with key = index, and value = name of parameters "
+function write_dict_index_variables()
+    variables_dictionary = variables_index(e4a)[2]
+    
+    open("dict_k_index_v_variables.txt", "w") do io
+        for line in  variables_dictionary
+            println(io, line)
+        end
+    end
+end
+
+"This function returns a file text with the dictionary  with key = name of parameters, and value = index of parameters "
+function write_dict_parameters_index()
+    parameters_dictionary = parameters_index_namespace(e4a)[1]
+    
+    open("dict_k_parameters_v_index.txt", "w") do io
+        for line in  parameters_dictionary
+            println(io, line)
+        end
+    end
+end
+
+"This function returns a file text with the dictionary  with key = index, and value = name of parameters "
+function write_dict_index_parameters()
+    parameters_dictionary = parameters_index_namespace(e4a)[2]
+    
+    open("dict_index_parameters.txt", "w") do io
+        for line in  parameters_dictionary
+            println(io, line)
+        end
+    end
+end
+
 
 function return_initial_condition_by_index(sol, dict, index)
     dictionaryIndexVariables = dict[2]
@@ -539,6 +583,7 @@ function return_initial_condition_by_name(sol, arg)
     return  initial_condition_variable 
 end
 
+
 function dict_name_and_initial_conditions(sol, e4a)
     nsp_v = ModelingToolkit.namespace_variables(e4a)
     dictionaryNameInitialCondition = Dict{Any,Any}()
@@ -546,6 +591,122 @@ function dict_name_and_initial_conditions(sol, e4a)
         dictionaryNameInitialCondition[i] = sol[i][1]
     end
     return dictionaryNameInitialCondition
+end
+
+"This function build the array of the variable initial conditions and save it in a file txt. 
+ NOTE: the variable values are sorted according to the indices"
+function array_initial_conditions_variable(sol, e4a)
+    nsp_v = ModelingToolkit.namespace_variables(e4a) 
+    dict_variables_index = read_file_variables()
+    dictionaryNameInitialCondition = Dict{Any,Any}()
+    dictionaryIndexInitialCondition = Dict{Int64,Float64}()
+    for i in nsp_v
+        c = string(i)
+        c = split(c, "₊")
+        c_2 = c[2]
+        c_2 = split(c_2, "(t)")
+        variable = c_2[1]
+        if (c_2[2] != "")
+            order = replace(c_2[2], ")" => "")
+            variable = variable * order
+        end
+        dictionaryNameInitialCondition[variable] = sol[i][1]
+    end
+    for (k,v) in dict_variables_index
+        for (j,t) in dictionaryNameInitialCondition
+            if (k==j)
+                dictionaryIndexInitialCondition[v] = t
+            end
+        end
+    end
+
+    array_initial_conditions = []
+    index = 0
+    open("variable_initial_conditions.txt", "w") do io
+        print(io,"u0 = [")
+        for key in sort(collect(keys(dictionaryIndexInitialCondition)))
+            index = index+1
+            push!(array_initial_conditions, dictionaryIndexInitialCondition[key] )
+            print(io, dictionaryIndexInitialCondition[key])
+            
+            if (index % 10 == 0)
+                println(io, ";")
+            else
+                print(io, ";")
+            end
+            #println("$key => $(dictionaryNameInitialCondition[key])")
+        end 
+        print(io, "]")
+    end
+    return [dictionaryIndexInitialCondition,dictionaryNameInitialCondition]
+end
+
+
+
+"This function build the array of the parameters and save it in a file txt. 
+ NOTE: the variable are sorted according to the indices"
+function array_parameter_values(e4a)
+    dict_parameters = read_file_parameters()
+     
+    all_values = ModelingToolkit.get_defaults(e4a)
+    
+    dictionaryIndexValues = Dict{Int64,Float64}()
+
+   for (k,v) in dict_parameters
+        
+        for (j,l) in all_values
+           
+            if (k==string(j))
+                
+                dictionaryIndexValues[v]=l
+            end
+        end
+        
+    end
+
+    p = []
+    index = 0
+    open("parameters_default_values.txt", "w") do io
+        print(io,"p = [")
+        for key in sort(collect(keys(dictionaryIndexValues)))
+            
+            push!(p, dictionaryIndexValues[key] )
+            print(io, dictionaryIndexValues[key])
+            index = index +1
+            if (index % 10 == 0)
+                println(io, ",")
+            else
+                print(io, ",")
+            end
+            #println("$key => $(dictionaryNameInitialCondition[key])")
+        end 
+        print(io, "]")
+    end
+    return dictionaryIndexValues
+end
+
+function comparison(e4a, parameters = _params)
+    par_namespace = ModelingToolkit.namespace_parameters(e4a)
+    println("keys ", typeof(keys(parameters)))
+    index = 0
+    
+ 
+        for i in par_namespace
+           
+            c = string(i)
+            c = split(c, "₊")
+            c_2 = c[2]
+            
+            if ( Symbol(c_2) in (keys(parameters)))
+                delete!(parameters,Symbol(c_2))
+            
+            else  
+                println("not found", c_2)
+            end
+        end
+    println(parameters)
+    
+    
 end
 
 function variable_index_name_value(_variables)
@@ -564,23 +725,35 @@ function variable_index_name_value(_variables)
     return [dictionaryVariablesIndex, dictionaryIndexVariables, dictionaryIndexValue]
 end 
 
-function parameters_index_namespace(e4a)
+function parameters_index_namespace(e4a, p = _params)
     nsp_p = ModelingToolkit.namespace_parameters(e4a)
-    dictionaryParametersIndex = Dict{Any,Any}()
-    dictionaryIndexParameters = Dict{Any,Any}()
+    dictionaryParametersIndex = Dict{String, Int64}()
+    dictionaryIndexParameters = Dict{Int64, String}()
+    dictionaryIndexValue = Dict{Any, Any}()
+    dict_merging = Dict{Any, Any}()
     index = 0
     for i in nsp_p
-        c = string(i)
-        c = split(c, "₊")
-        c_2 = c[2]
-        
-        index = index +1
-        dictionaryParametersIndex[c_2]=index
-        dictionaryIndexParameters[index]=c_2
-    end
+            c = string(i)
+            c = split(c, "₊")
+            c_2 = c[2]
+            index = index +1
+            dictionaryParametersIndex[c_2]=index
+            dictionaryIndexParameters[index]=c_2
+            
     
-    return [dictionaryParametersIndex, dictionaryIndexParameters]
+    end
+    for (j,t) in p
+        for (k,v) in dictionaryParametersIndex
+                
+                if (string(j) == k)
+                    dictionaryIndexValue[v] = t
+                end
+            
+        end
+    end  
+    return [dictionaryParametersIndex, dictionaryIndexParameters, dictionaryIndexValue]
 end
+
 
 
 function params_index_name_value(_params)
@@ -590,15 +763,18 @@ function params_index_name_value(_params)
     dictionaryIndexValue = Dict{Any,Any}()
     index = 0
     for (k,v) in _params
+        
         index = index +1
         dictionaryParametersIndex[string(k)]=index
         dictionaryIndexParameters[index]=string(k)
         dictionaryIndexValue[index] = v
     end
+
     return [dictionaryParametersIndex, dictionaryIndexParameters, dictionaryIndexValue]
 end 
 
-#split equations based on their characteristics 
+
+"This function splits equations based on their characteristics add or smooth equation."
 
 function equation_one_by_one()
     equations = split(text, "\n" )
@@ -608,56 +784,47 @@ function equation_one_by_one()
         
         if (string(e[1]) == "a")
             add_split_equation(e, chunk_array)
-        end
-        if (string(e[1]) == "s")
+        
+        elseif (string(e[1]) == "s")
             smooth_translate_diff_eq(e, chunk_array)
+        else
+            println("not found", e)
         end
+        
     end
 return chunk_array
 end
 
+"This function writes all the equations in a txt file"
 function write_txt()
     translated_equations = equation_one_by_one()
     
-    open("all_equations.txt", "w") do io
+    open("all_equations_update.txt", "w") do io
         for line in  translated_equations
             println(io, line)
         end
     end
 end
 
-#add_equation
+"This function splits the add_equations in differential equations and not differential equations"
 
 function add_split_equation(e, chunk_array)
     
-    #e = "add_equation!(eqs, GSGDP ~ GS / NI)"
-    #e = split(text, "\n" )
-   
     all_components = []
-    #chunk_array = []
-    """
-    for i in e
-        #e_split = split.(i, "eqs, " )
-        e_split= getindex.(split.(i, "eqs, "), 2)
-        e_split = chop(e_split, tail =1)
-        
-        
-        push!(all_components, e_split)
-    end
-    """
     e_split= getindex.(split.(e, "eqs, "), 2)
     e_split = chop(e_split, tail =1)
     push!(all_components, e_split)
     
     for e_split in all_components
+        
         if (string(e_split[1]) == "D" && string(e_split[2]) == "(" )
                 
-            #println("Go to write differential equations")
+           
             write_differential_eq(e_split, chunk_array)
             
-        end
-        if  (string(e_split[1]) != "D" && string(e_split[2]) != "(" )
-            #println("Go to another method")
+        
+        else  #(string(e_split[1]) != "D" && string(e_split[2]) != "(" )
+            
             write_not_differential_eq(e_split, chunk_array)
 
         end
@@ -668,10 +835,37 @@ function add_split_equation(e, chunk_array)
     return [all_components, chunk_array]
 end
 
+"this function read the file txt with the dictionary of variables name and index"
+function read_file_variables()
+    vars = Dict{String, Int64}()
+    f = open("dict_k_variables_v_index.txt")
+    for line in eachline(f)
+        var, val = split(line, "=>")
+        var = chop(var, head =1, tail= 2)
+        vars[string(var)] = parse(Int64, val)
+    end
+    return vars
+end
+
+"this function read the file txt with the dictionary of parameters name and index"
+
+function read_file_parameters()
+    vars = Dict{String, Int64}()
+    f = open("dict_k_parameters_v_index.txt")
+    for line in eachline(f)
+        var, val = split(line, "=>")
+        var = chop(var, head =1, tail= 2)
+        vars[string(var)] = parse(Int64, val)
+    end
+    return vars
+
+end
+
+"This function translates the add equations that are not differential equations"
 function write_not_differential_eq(e_split, chunk_array)
     #variable_index = variable_index_name_value(_variables)[1]
-    variable_index = variables_index(e4a)[1]
-    parameter_index = parameters_index_namespace(e4a)[1]
+    variable_index = read_file_variables()
+    parameter_index = read_file_parameters()
     
     chunk = split.(e_split, " ")
     new_chunk = ""
@@ -736,9 +930,7 @@ function write_not_differential_eq(e_split, chunk_array)
                     else
                         new_chunk = new_chunk * " " * string(i)* " " 
                     end
-
-                
-                
+   
                 elseif (string(last(i)) == "," )
                     if (string(last(i,2)) == "),")
                         c = string(last(i,2))
@@ -792,11 +984,13 @@ function write_not_differential_eq(e_split, chunk_array)
 end
 
 
-#add_equation
+"This function translates the add equations that are differential equations"
 function write_differential_eq(e_split, chunk_array)
-    #variable_index = variable_index_name_value(_variables)[1]
-    variable_index = variables_index(e4a)[1]
-    parameter_index = parameters_index_namespace(e4a)[1]
+    
+    #variable_index = variables_index(e4a)[1]
+    #parameter_index = parameters_index_namespace(e4a)[1]
+    variable_index = read_file_variables()
+    parameter_index = read_file_parameters()
     
     chunk = split.(e_split, " ")
     new_chunk = ""
@@ -855,14 +1049,13 @@ function write_differential_eq(e_split, chunk_array)
     return chunk_array
 end
 
-
-
-#global e1 ="smooth!(eqs, var1, var1 * (var1 + var1 + var2) / 3, par3)"
-#global e1 = "smooth!(eqs, var1, var2, par1)"
+"This function translates the the smooth equations"
 function smooth_translate_diff_eq(e, chunk_array)
     
-    variable_index = variables_index(e4a)[1]
-    parameter_index = parameters_index_namespace(e4a)[1]
+    #variable_index = variables_index(e4a)[1]
+    #parameter_index = parameters_index_namespace(e4a)[1]
+    variable_index = read_file_variables()
+    parameter_index = read_file_parameters()
     new_chunk1 = ""
     new_chunk2 = ""
     new_chunk3 = ""
@@ -957,15 +1150,15 @@ function smooth_translate_diff_eq(e, chunk_array)
     end
 
     
-    
+   
     #define and translate chunk 3
     if (string(chunk[3]) in (keys(parameter_index)))
         new_chunk3 = new_chunk3 * " / p["*string(parameter_index[string(chunk[3])])*"]"
        
     end
-    
-    
-new_chunk_final = new_chunk1 * "(" *new_chunk2 * ")" * new_chunk3    
+  
+new_chunk_1_v2 = replace(new_chunk1, "d" => "", "=" => "", " " => "")
+new_chunk_final = new_chunk1 * "(" *new_chunk2 *"-" * new_chunk_1_v2* ")" * new_chunk3    
 push!(chunk_array, new_chunk_final)
 
 return chunk_array  

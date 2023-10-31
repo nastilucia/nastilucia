@@ -55,7 +55,7 @@ end
 function withlookup(x, pairs::Vector{Tuple{Float64,Float64}})
    interpolate(x, map(t -> t[end], pairs), map(t -> t[1], pairs))
 end
-
+"""
 ##############################################################################
 # Functions supporting documentation and analysis of ODE systems and solutions
 ##############################################################################
@@ -773,3 +773,4 @@ function fig_e4a(sol, tit; kwargs...)
 
    return WorldDynamics.plotvariables(sol, (t, 1980, 2100), variables; title=tit, kwargs...)
 end
+"""

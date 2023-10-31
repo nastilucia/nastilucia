@@ -1,15 +1,14 @@
 _params = Dict{Symbol,Float64}(
-    # climate
-    :initFOLA => 1100,
-    :initNHW => 2,
-    :initWSO =>0.5,
-    :initWF => 1530,
-    :initEGDPP => 6.4,
-    :initEPA => 0,
-    :initLE => 67,
-    :initPA => 62,
-    :initSTE => 1.3,
-    :initSOTR => 0.6, 
+    :INITFOLA => 1100,
+    :INITNHW => 2,
+    :INITWSO =>0.5,
+    :INITWF => 1530,
+    :INITEGDPP => 6.4,
+    :INITEPA => 0,
+    :INITLE => 67,
+    :INITPA => 62,
+    :INITSTE => 1.3,
+    :INITSOTR => 0.6, 
     :ERDN2OKF2022 => 0, # 0.01 in GL,
     :RDN2OKF => 0.01,
     :KN2OKF1980 => 0.11,
@@ -53,7 +52,6 @@ _params = Dict{Symbol,Float64}(
     :PD => 5,
     :TRSA1980 => 0.01,
     :CCCSt => 95,
-    # demand
     :BITRW => 0.2,
     :EETF2022 => 0, # 0.02 in GL,
     :EGTRF2022 => 0, # 0.01 in GL,
@@ -87,7 +85,6 @@ _params = Dict{Symbol,Float64}(
     :WCF => 0.9,
     :WDP => 10,
     :WPP => 20,
-    # energy
     :MNFCO2PP => 0.5,
     :FCO2SCCS2022 => 0,
     :GFCO2SCCS => 0.2, # 0.9 in GL,
@@ -129,7 +126,6 @@ _params = Dict{Symbol,Float64}(
     :AFMCM => 1.35,
     :TCFFFNEU => 240,
     :TC => 0.02,
-    # finance
     :FSRT => 1,
     :GRCR => 0,
     :IEFT => 10,
@@ -143,7 +139,6 @@ _params = Dict{Symbol,Float64}(
     :UNSR => -1.5,
     :UPTCB => 1,
     :UT => 0.05,
-    # foodland
     :AFGDP => 0.05,
     :CBECLE => -0.03,
     :CO2ARA => 1,
@@ -160,6 +155,7 @@ _params = Dict{Symbol,Float64}(
     :FCG => 0.1,
     :FFLREOGRRM => -5,
     :FU80 => 61,
+    :FF80 => 88450,
     :FUELER => 0.02,
     :FUESQ => -0.001,
     :GCWR => 0.05, # 0.2 in GL,
@@ -179,7 +175,6 @@ _params = Dict{Symbol,Float64}(
     :TFFLR => 0.2,
     :UDT => 10,
     :ULP => 0.05,
-    # inventory
     :DAT => 1.2,
     :DDI1980 => 1,
     :DIC => 0.4,
@@ -196,7 +191,6 @@ _params = Dict{Symbol,Float64}(
     :SRI => 1,
     :SWI1980 => 1,
     :TAS => 0.24,
-    # labourmarket
     :AUR => 0.05,
     :FIC => 1,
     :GDPP1980 => 6.4, # Should be the same in Population
@@ -215,11 +209,9 @@ _params = Dict{Symbol,Float64}(
     :TYLD => 2.3,
     :WSOECLR => 1.05,
     :WSOELPR => 0.2,
-    # other
     :TEGR => 4,
     :INELOK => -0.5,
     :NK => 0.3,
-    # output
     :CAPPIS1980 => 59250,
     :CAPPUS1980 => 5350,
     :CC1980 => 1,
@@ -254,7 +246,6 @@ _params = Dict{Symbol,Float64}(
     :PCORPUS => 2.3,
     :TOED => 1,
     :WSOEFRA => -2.5,
-    # population
     :CMFR => 0.01,
     :DNC80 => 4.3,
     :DNCA => 0,
@@ -278,7 +269,6 @@ _params = Dict{Symbol,Float64}(
     :OWELE => -0.02,
     :SSP2FA2022F => 1,
     :TAHI => 10,
-    # public
     :CTA2022 => 9145,
     :CTPIS => 1.5, # Taken from Output sector
     :EDROTA2022 => 0.003,
@@ -296,7 +286,6 @@ _params = Dict{Symbol,Float64}(
     :XETAC2022 => 0,
     :XETAC2100 => 0,
     :OW2022 => 1.35,
-    # wellbeing
     :AI => 0.6,
     :AP => 0.02,
     :AWBPD => 9,
@@ -322,7 +311,6 @@ _params = Dict{Symbol,Float64}(
     :TPR => 0.02,
     :TPS => 3,
     :TW => 1,
-   
 )
 
 getparameters() = copy(_params)
