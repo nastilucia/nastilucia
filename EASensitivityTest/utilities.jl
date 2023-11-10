@@ -615,6 +615,7 @@ function array_initial_conditions_variable(sol, e4a)
     for (k,v) in dict_variables_index
         for (j,t) in dictionaryNameInitialCondition
             if (k==j)
+                #println(k, " " , j , " ", v, " ", t)
                 dictionaryIndexInitialCondition[v] = t
             end
         end
@@ -657,7 +658,7 @@ function array_parameter_values(e4a)
         for (j,l) in all_values
            
             if (k==string(j))
-                
+                println(k, " ", j, " ", v, " ", l)
                 dictionaryIndexValues[v]=l
             end
         end
@@ -669,7 +670,7 @@ function array_parameter_values(e4a)
     open("parameters_default_values.txt", "w") do io
         print(io,"p = [")
         for key in sort(collect(keys(dictionaryIndexValues)))
-            
+            println(key, "   ", dictionaryIndexValues[key])
             push!(p, dictionaryIndexValues[key] )
             print(io, dictionaryIndexValues[key])
             index = index +1

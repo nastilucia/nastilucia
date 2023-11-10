@@ -5,7 +5,7 @@ using Latexify
 using PlotlyJS
 using Printf
 
-using WorldDynamics
+#using WorldDynamics
 
 function add_equation!(eqs, equation)
    append!(eqs, [equation])
