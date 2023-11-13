@@ -1,6 +1,6 @@
 using GlobalSensitivity, Statistics, OrdinaryDiffEq, QuasiMonteCarlo, Plots
 include("functions.jl")
-
+#tables
 tables = Dict{Symbol,Tuple{Vararg{Float64}}}(
     :ROCWSO => (
         0.06,
