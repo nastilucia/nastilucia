@@ -4,4 +4,5 @@ _params = Dict{Symbol,Float64}(
     :par3 => 1.0,
 )
 
-getparameters() = copy(_params)
+getparameters() = copy(_params
+#parameters
